@@ -1,6 +1,7 @@
 name: Build OpenWrt_lede-R2S
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'R2S.config'
