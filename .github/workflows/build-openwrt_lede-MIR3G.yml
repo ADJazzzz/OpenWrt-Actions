@@ -1,6 +1,7 @@
 name: Build OpenWrt_lede-MIR3G
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'MIR3G.config'
