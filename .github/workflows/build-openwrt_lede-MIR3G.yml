@@ -114,7 +114,7 @@ jobs:
       id: tag
       if: steps.organize.outputs.ORGANIZE_STATUS == 'success' && !cancelled()
       run: |
-        echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
+        echo "RELEASE_TAG=$(date +"%Y.%m.%d-%H%M")" >> "$GITHUB_OUTPUT"
         touch release.txt
         echo "TAG_STATUS=success" >> "$GITHUB_OUTPUT"
 
@@ -124,6 +124,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: MIR3G-${{ steps.tag.outputs.release_tag }}
+        tag_name: MIR3G-${{ steps.tag.outputs.RELEASE_TAG }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
