@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'R2S.config'
+  schedule:
+    - cron: '0 12 * * 5'
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -22,6 +24,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Initialization Environment
       env:
@@ -81,35 +85,24 @@ jobs:
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "COMPILE_STATUS=success" >> "$GITHUB_OUTPUT"
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-
-    - name: Check Space Usage
-      if: (!cancelled())
-      run: df -hT
-
-    - name: Upload Bin Directory
-      uses: actions/upload-artifact@v3
-      if: steps.compile.outputs.COMPILE_STATUS == 'success' && !cancelled()
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> "$GITHUB_OUTPUT"
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> "$GITHUB_OUTPUT"
 
     - name: Organize Files
       id: organize
       if: steps.compile.outputs.COMPILE_STATUS == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "FIRMWARE=$PWD" >> "$GITHUB_OUTPUT"
         echo "ORGANIZE_STATUS=success" >> "$GITHUB_OUTPUT"
 
     - name: Upload Firmware Directory
+      id: upload
       uses: actions/upload-artifact@v3
       if: steps.organize.outputs.ORGANIZE_STATUS == 'success' && !cancelled()
       with:
-        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+        name: OpenWrt_firmware${{ steps.compile.outputs.DEVICE_NAME }}${{ steps.compile.outputs.FILE_DATE }}
+        path: ${{ steps.organize.outputs.FIRMWARE }}
 
     - name: Generate Release Tag
       id: tag
@@ -117,6 +110,12 @@ jobs:
       run: |
         echo "RELEASE_TAG=$(date +"%Y.%m.%d-%H%M")" >> "$GITHUB_OUTPUT"
         touch release.txt
+        echo -e "**注**\n" >> release.txt
+        echo -e "默认管理地址：\`10.0.0.1\`\n" >> release.txt
+        echo -e "默认密码：\`password\`\n" >> release.txt
+        echo -e "插件：\n" >> release.txt
+        grep '^CONFIG_PACKAGE.*app.*=y' openwrt/.config | sed -r 's/.*app-(.*)=y/\1/' > APP_NAME
+        [ -s APP_NAME ] && echo -e "\```$(cat APP_NAME)\```\n" >> release.txt
         echo "TAG_STATUS=success" >> "$GITHUB_OUTPUT"
 
     - name: Upload Firmware To Release
@@ -127,4 +126,4 @@ jobs:
       with:
         tag_name: R2S-${{ steps.tag.outputs.RELEASE_TAG }}
         body_path: release.txt
-        files: ${{ env.FIRMWARE }}/*
+        files: ${{ steps.organize.outputs.FIRMWARE }}/*
