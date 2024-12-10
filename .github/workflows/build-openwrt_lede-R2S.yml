@@ -23,7 +23,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -59,9 +59,6 @@ jobs:
 
     - name: Update And Install Feeds 2
       run: cd openwrt && ./scripts/feeds update -a && rm -rf feeds/packages/net/adguardhome && ./scripts/feeds install -a
-
-    - name: Change golang version
-      run: cd openwrt && rm -rf feeds/packages/lang/golang && git clone https://github.com/ADJazzzz/OpenWrt-Golang feeds/packages/lang/golang
 
     - name: Load Custom Configuration
       run: |
