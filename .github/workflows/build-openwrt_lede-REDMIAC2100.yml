@@ -98,7 +98,7 @@ jobs:
 
     - name: Upload Firmware Directory
       id: upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: steps.organize.outputs.ORGANIZE_STATUS == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ steps.compile.outputs.DEVICE_NAME }}${{ steps.compile.outputs.FILE_DATE }}
@@ -119,7 +119,7 @@ jobs:
         echo "TAG_STATUS=success" >> "$GITHUB_OUTPUT"
 
     - name: Upload Firmware To Release
-      uses: softprops/action-gh-release@v0.1.15
+      uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.TAG_STATUS == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
