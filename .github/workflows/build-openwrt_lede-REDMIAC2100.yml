@@ -111,7 +111,7 @@ jobs:
         echo "RELEASE_TAG=$(date +"%Y.%m.%d-%H%M")" >> "$GITHUB_OUTPUT"
         touch release.txt
         echo -e "**注**\n" >> release.txt
-        echo -e "默认管理地址：\`10.0.0.1\`\n" >> release.txt
+        echo -e "默认管理地址：\`192.168.1.1\`\n" >> release.txt
         echo -e "默认密码：\`password\`\n" >> release.txt
         echo -e "插件：\n" >> release.txt
         grep '^CONFIG_PACKAGE.*app.*=y' openwrt/.config | sed -r 's/.*app-(.*)=y/\1/' > APP_NAME
