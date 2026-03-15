@@ -1,1 +1,1 @@
-echo 'src-git adjazz https://github.com/ADJazzzz/OpenWrt-package' >>feeds.conf.default
+# echo 'src-git adjazz https://github.com/ADJazzzz/OpenWrt-package' >>feeds.conf.default

@@ -54,12 +54,6 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$CUSTOM_FEED
 
-    - name: Update And Install Feeds 1
-      run: cd openwrt && ./scripts/feeds update -a && rm -rf feeds/packages/net/adguardhome && ./scripts/feeds install -a
-
-    - name: Update And Install Feeds 2
-      run: cd openwrt && ./scripts/feeds update -a && rm -rf feeds/packages/net/adguardhome && ./scripts/feeds install -a
-
     - name: Load Custom Configuration
       run: |
         [ -e files ] && mv files openwrt/files
