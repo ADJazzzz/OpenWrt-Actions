@@ -62,6 +62,9 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$CUSTOM_CONFIG
 
+    - name: Update And Install Feeds
+      run: cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
+
     - name: Download Package
       id: package
       run: |
