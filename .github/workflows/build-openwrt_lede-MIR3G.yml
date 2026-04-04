@@ -54,27 +54,21 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$CUSTOM_FEED
 
+    - name: Update And Install Feeds
+      run: cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
+
     - name: Load Custom Configuration
       run: |
         [ -e files ] && mv files openwrt/files
-        [ -e "$CONFIG_FILE" ] || { echo "Missing config file: $CONFIG_FILE"; exit 1; }
         cp -f "$CONFIG_FILE" openwrt/.config
         chmod +x $CUSTOM_CONFIG
         cd openwrt
         $GITHUB_WORKSPACE/$CUSTOM_CONFIG
-        [ -s .config ] || { echo ".config is empty after custom config step"; exit 1; }
-
-    - name: Update And Install Feeds
-      run: cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
     - name: Download Package
       id: package
       run: |
         cd openwrt
-        make olddefconfig
-        echo "Using target profile from .config:"
-        grep '^CONFIG_TARGET_PROFILE=' .config || true
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config || true
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
