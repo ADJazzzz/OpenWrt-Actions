@@ -57,14 +57,18 @@ jobs:
     - name: Update And Install Feeds
       run: cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
+    - name: Load Custom Configuration
+      run: |
+        [ -e files ] && mv files openwrt/files
+        cp -f "$CONFIG_FILE" openwrt/.config
+        chmod +x $CUSTOM_CONFIG
+        cd openwrt
+        $GITHUB_WORKSPACE/$CUSTOM_CONFIG
+
     - name: Download Package
       id: package
       run: |
         cd openwrt
-        cp -f "$GITHUB_WORKSPACE/$CONFIG_FILE" .config
-        chmod +x "$GITHUB_WORKSPACE/$CUSTOM_CONFIG"
-        "$GITHUB_WORKSPACE/$CUSTOM_CONFIG"
-        make olddefconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
