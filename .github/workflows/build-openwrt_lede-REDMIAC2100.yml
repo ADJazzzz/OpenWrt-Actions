@@ -71,10 +71,7 @@ jobs:
       id: package
       run: |
         cd openwrt
-        make olddefconfig
-        echo "Using target profile from .config:"
-        grep '^CONFIG_TARGET_PROFILE=' .config || true
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config || true
+        make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
