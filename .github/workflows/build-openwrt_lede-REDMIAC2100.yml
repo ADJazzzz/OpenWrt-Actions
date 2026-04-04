@@ -59,9 +59,11 @@ jobs:
         [ -e files ] && mv files openwrt/files
         [ -e "$CONFIG_FILE" ] || { echo "Missing config file: $CONFIG_FILE"; exit 1; }
         cp -f "$CONFIG_FILE" openwrt/.config
+        grep -q '^CONFIG_TARGET_PROFILE="DEVICE_xiaomi_redmi-router-ac2100"' openwrt/.config || { echo "Personal target profile is missing in $CONFIG_FILE"; exit 1; }
         chmod +x $CUSTOM_CONFIG
         cd openwrt
         $GITHUB_WORKSPACE/$CUSTOM_CONFIG
+        grep -q '^CONFIG_KERNEL_BUILD_USER="ADJazz"' .config || { echo "Custom config script did not apply personal build user"; exit 1; }
         [ -s .config ] || { echo ".config is empty after custom config step"; exit 1; }
 
     - name: Update And Install Feeds
