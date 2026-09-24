@@ -92,7 +92,7 @@ jobs:
 
     - name: Upload Firmware Directory
       id: upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: steps.organize.outputs.ORGANIZE_STATUS == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ steps.compile.outputs.DEVICE_NAME }}${{ steps.compile.outputs.FILE_DATE }}
