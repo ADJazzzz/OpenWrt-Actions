@@ -1,0 +1,60 @@
+name: Cleanup Old Releases
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_latest:
+        default: '2'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete older releases
+        uses: actions/github-script@v9
+        env:
+          KEEP_LATEST: ${{ github.event.inputs.keep_latest }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const keepLatest = Number(process.env.KEEP_LATEST);
+
+            const releases = await github.paginate(
+              github.rest.repos.listReleases,
+              { owner, repo, per_page: 100 }
+            );
+
+            releases.sort(
+              (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            );
+
+            const toDelete = releases.slice(keepLatest);
+            if (toDelete.length === 0) {
+              console.log(`Nothing to delete. Total: ${releases.length}`);
+              return;
+            }
+
+            console.log(
+              `Total: ${releases.length}, keep: ${keepLatest}, delete: ${toDelete.length}`
+            );
+
+            for (const rel of toDelete) {
+              console.log(`Deleting release: ${rel.tag_name} (id=${rel.id})`);
+              await github.rest.repos.deleteRelease({
+                owner, repo, release_id: rel.id,
+              });
+
+              try {
+                await github.rest.git.deleteRef({
+                  owner, repo, ref: `tags/${rel.tag_name}`,
+                });
+                console.log(`  Tag deleted: ${rel.tag_name}`);
+              } catch (err) {
+                if (err.status !== 404) {
+                  console.log(`  Tag delete failed: ${err.message}`);
+                }
+              }
+            }
+            console.log('Cleanup done.');
